@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Forum szkolne</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<style>
+:root{--bg:#e5e5e5;--page:#fff;--r1:#efefef;--r2:#dee3e7;--hd:#006699;--hd2:#0a4a73;--bd:#006699;--tx:#000;--lk:#006699;--mu:#444;--adm:#c00;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1f24;--page:#262b31;--r1:#2d333a;--r2:#343b43;--hd:#2b6a8f;--hd2:#1d4a65;--bd:#4a7f9d;--tx:#e6e6e6;--lk:#7ec1e8;--mu:#aaa;--adm:#ff7b7b}}
+:root[data-theme="dark"]{--bg:#1b1f24;--page:#262b31;--r1:#2d333a;--r2:#343b43;--hd:#2b6a8f;--hd2:#1d4a65;--bd:#4a7f9d;--tx:#e6e6e6;--lk:#7ec1e8;--mu:#aaa;--adm:#ff7b7b}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:12px/1.45 Verdana,Tahoma,Arial,sans-serif;min-height:100vh}
+button,input,textarea{font:inherit;color:inherit}
+.lnk{color:var(--lk);background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.lnk:hover{text-decoration:underline}
+.head{background:var(--page);border-bottom:2px solid var(--bd)}
+.head .in,.wrap{max-width:900px;margin:0 auto;padding:0 10px}
+.head .in{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:60px;flex-wrap:wrap}
+.head h1{margin:0;font:bold 26px Georgia,"Times New Roman",serif;color:var(--hd)}
+.nav{display:flex;flex-wrap:wrap;gap:4px}
+.nav button{background:var(--r2);color:var(--lk);border:2px outset var(--r2);font:bold 11px Verdana,sans-serif;padding:4px 10px;cursor:pointer}
+.nav button:hover{text-decoration:underline}
+.nav button[aria-current=true]{border-style:inset;background:var(--r1)}
+.nav button:focus-visible,.lnk:focus-visible,.b:focus-visible{outline:2px solid var(--lk);outline-offset:1px}
+.sub{background:var(--r2);border-bottom:1px solid var(--bd);font-size:11px}
+.sub .in{display:flex;justify-content:flex-end;gap:14px;padding:4px 10px;max-width:900px;margin:0 auto}
+.wrap{padding-top:10px;padding-bottom:30px}
+.crumb{margin:0 0 8px}
+.blk{background:var(--bd);border:2px solid var(--bd);margin-bottom:8px;display:flex;flex-direction:column;gap:1px}
+.blk>.h{background:linear-gradient(var(--hd),var(--hd2));color:#fff;font-weight:bold;font-size:12px;padding:6px 8px}
+.row{display:grid;grid-template-columns:36px 1fr 80px 190px;gap:8px;align-items:center;padding:7px 8px;background:var(--r1)}
+.blk>.row:nth-child(even){background:var(--r2)}
+.row .n{font-weight:bold;font-size:13px}
+.row .s,.s{font-size:11px;color:var(--mu)}
+.row .c{text-align:center;font-size:11px;color:var(--mu)}
+.row .c b{display:block;font-size:13px;color:var(--tx)}
+.av{width:30px;height:30px;background:var(--r2);color:var(--hd);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px}
+.av.big{width:64px;height:64px;font-size:22px;margin-bottom:6px}
+.adm{color:var(--adm);font-weight:bold}
+.post{display:grid;grid-template-columns:150px 1fr;background:var(--page)}
+.post .u{background:var(--r2);padding:10px;font-size:11px;color:var(--mu)}
+.post .u b{display:block;font-size:12px;color:var(--tx)}
+.post .m{padding:8px 12px;background:var(--page)}
+.post .d{font-size:11px;color:var(--mu);border-bottom:1px solid var(--bd);padding-bottom:4px;margin-bottom:8px}
+.post .t{white-space:pre-wrap;font-size:13px;max-width:70ch}
+.pad{padding:10px;background:var(--r1)}
+.chat{max-height:50vh;min-height:200px;overflow-y:auto;padding:6px 10px;background:var(--page)}
+.msg{display:flex;gap:8px;padding:6px 0;border-bottom:1px dotted var(--bd)}.msg .av{flex:none}
+form.blk>.pad,.box form.pad{background:var(--page)}
+label{display:block;font-weight:bold;margin:0 0 3px}
+input[type=text],input[type=password],textarea{width:100%;font:12px Verdana,sans-serif;background:var(--page);color:var(--tx);border:1px solid var(--bd);padding:4px;margin-bottom:10px}
+input:focus,textarea:focus{outline:2px solid var(--lk);outline-offset:0}
+.b{font:bold 11px Verdana,sans-serif;background:var(--r2);color:var(--tx);border:2px outset var(--r2);padding:3px 12px;cursor:pointer}
+.b:active{border-style:inset}
+.bar{display:flex;justify-content:flex-start;margin-bottom:8px}
+.box{max-width:380px;margin:40px auto 0}
+.err{color:var(--adm);font-weight:bold;margin-bottom:8px;min-height:1.2em}
+.foot{text-align:center;color:var(--mu);font-size:11px;margin-top:10px}
+[hidden]{display:none!important}
+@media (max-width:640px){.row{grid-template-columns:34px 1fr 56px}.row .l{display:none}.post{grid-template-columns:1fr}.post .u{display:flex;gap:10px;align-items:center}.post .u .av{margin:0;width:36px;height:36px;font-size:14px}.head .in{padding-bottom:6px}}
+
+html{-webkit-text-size-adjust:100%}
+@media (max-width:640px){
+body{font-size:13px}
+.wrap,.head .in{padding-left:8px;padding-right:8px}
+.head .in{flex-direction:column;align-items:flex-start;gap:6px;padding-top:8px}
+.head h1{font-size:22px}
+.nav{flex-wrap:nowrap;overflow-x:auto;width:100%;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.nav button{white-space:nowrap;padding:8px 12px;font-size:12px}
+input[type=text],input[type=password],textarea{font-size:16px;padding:8px}
+.b{padding:8px 16px;font-size:12px}
+.box{margin:16px auto 0}
+.row{padding:10px 8px}
+.chat{max-height:none;height:calc(100dvh - 330px);min-height:220px}
+.sub .in{padding:6px 8px}
+}
+</style>
+</head>
+<body>
+<div id="login">
+  <div class="head"><div class="in"><h1>Forum szkolne</h1><nav class="nav" id="nav0" aria-label="Menu główne"><button data-n="i">STRONA GŁÓWNA</button><button data-n="0">OGŁOSZENIA</button><button data-n="1">KLASA</button><button data-n="4">DYSKUSJE</button><button data-n="c">CHAT</button></nav></div></div>
+  <div class="wrap"><div class="blk box"><div class="h">Logowanie</div>
+    <form class="pad" id="lf">
+      <label for="u">Login</label><input id="u" type="text" autocomplete="username" required>
+      <label for="p">Hasło</label><input id="p" type="password" autocomplete="current-password" required>
+      <div class="err" id="err" role="alert"></div>
+      <button class="b" type="submit">Zaloguj się</button>
+    </form></div></div>
+</div>
+
+<div id="app" hidden>
+  <div class="head"><div class="in"><h1>Forum szkolne</h1><nav class="nav" id="nav" aria-label="Menu główne"><button data-n="i">STRONA GŁÓWNA</button><button data-n="0">OGŁOSZENIA</button><button data-n="1">KLASA</button><button data-n="4">DYSKUSJE</button><button data-n="c">CHAT</button></nav></div></div>
+  <div class="sub"><div class="in"><span id="who"></span><button class="lnk" id="out">Wyloguj</button></div></div>
+  <div class="wrap"><div id="main"></div><div class="foot">Forum szkolne</div></div>
+</div>
+
+<script>
+const USERS={uczen:{pass:"szkola123",name:"Kasia Wrona",role:"Uczeń",klasa:"2B",posts:41},nauczyciel:{pass:"szkola123",name:"Marek Nowicki",role:"Nauczyciel",klasa:"",posts:212}};
+const CATS=[
+ {g:"Sprawy szkoły",items:[["Ogłoszenia","Informacje od dyrekcji i nauczycieli"],["Moja klasa","Sprawy klas, wycieczki, samorząd"]]},
+ {g:"Nauka i zajęcia",items:[["Pytania do lekcji","Pomoc w nauce, zakres sprawdzianów"],["Koła i projekty","Gazetka, teatr, koła przedmiotowe"]]},
+ {g:"Poza lekcjami",items:[["Pogaduszki","Wszystko, co nie pasuje gdzie indziej"]]}
+];
+const NAMES=CATS.flatMap(g=>g.items.map(i=>i[0]));
+const T=[
+{id:1,cat:0,title:"Zmiana terminu zebrania z rodzicami",by:"Marek Nowicki",role:"Nauczyciel",at:"24.11.2026, 18:02",body:"Zebranie przesunięte na czwartek, godz. 17:30, sala 12. Proszę przekazać informację rodzicom.",re:[]},
+{id:2,cat:2,title:"Czy sprawdzian z funkcji obejmuje logarytmy?",by:"Kasia Wrona",role:"Uczeń",at:"23.11.2026, 20:15",body:"W zeszycie mam zakres do funkcji wykładniczej, ale kolega mówił, że będą też logarytmy.",re:[{by:"Marek Nowicki",role:"Nauczyciel",at:"23.11.2026, 21:40",body:"Logarytmy dopiero na kolejnym sprawdzianie. Tym razem kończymy na wykładniczej."},{by:"Kasia Wrona",role:"Uczeń",at:"23.11.2026, 21:52",body:"Dziękuję!"}]},
+{id:3,cat:3,title:"Szukamy osób do gazetki szkolnej",by:"Kasia Wrona",role:"Uczeń",at:"22.11.2026, 13:30",body:"Potrzebujemy kogoś do składu i dwie osoby do pisania. Spotkanie w piątek na długiej przerwie.",re:[]},
+{id:4,cat:1,title:"Wycieczka w maju: propozycje miejsc",by:"Kasia Wrona",role:"Uczeń",at:"18.11.2026, 09:10",body:"Wpisujcie pomysły. Głosowanie zrobimy na godzinie wychowawczej.",re:[]}
+];
+const CH=[{by:"Marek Nowicki",role:"Nauczyciel",at:"07:45",body:"Dzień dobry, pamiętajcie o zadaniu na dziś."},{by:"Kasia Wrona",role:"Uczeń",at:"07:48",body:"Dzień dobry!"}];
+const SUPABASE_URL="";
+const SUPABASE_KEY="";
+const DOMAIN="forum.test";
+const sb=(SUPABASE_URL&&SUPABASE_KEY&&window.supabase)?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+const PROF={};
+let me=null,view={t:"index"},nid=5;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ini=n=>n.split(" ").map(w=>w[0]).join("");
+const nm=(n,r)=>r==="Nauczyciel"?`<span class="adm">${esc(n)}</span>`:esc(n);
+const now=()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()}, ${p(d.getHours())}:${p(d.getMinutes())}`};
+const last=t=>t.re.length?t.re[t.re.length-1]:t;
+
+function enter(u){
+  me=u;$("#err").textContent="";$("#login").hidden=true;$("#app").hidden=false;
+  $("#who").innerHTML=`Zalogowany: <b>${esc(u.name)}</b>`;
+  go({t:"index"});
+}
+async function loadChat(){
+  const pr=await sb.from("profiles").select("id,name,role,klasa");
+  (pr.data||[]).forEach(p=>PROF[p.id]=p);
+  const ms=await sb.from("messages").select("id,user_id,body,created_at").order("created_at",{ascending:false}).limit(100);
+  CH.length=0;(ms.data||[]).reverse().forEach(addMsg);
+  sb.channel("chat").on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},p=>{addMsg(p.new);refreshChat()}).subscribe();
+}
+function addMsg(r){
+  if(r.id!==undefined&&CH.some(c=>c.id===r.id))return;
+  if(r.user_id&&!PROF[r.user_id]){PROF[r.user_id]={name:"Użytkownik",role:"Uczeń"}}
+  const p=r.user_id?PROF[r.user_id]:r;
+  CH.push({id:r.id,by:p.name||r.by,role:p.role||r.role,at:r.created_at?new Date(r.created_at).toLocaleTimeString("pl-PL",{hour:"2-digit",minute:"2-digit"}):r.at,body:r.body});
+}
+function msgsHtml(){return CH.map(c=>`<div class="msg"><div class="av">${ini(c.by)}</div><div><b>${nm(c.by,c.role)}</b> <span class="s">${c.at}</span><div>${esc(c.body)}</div></div></div>`).join("")}
+function refreshChat(){const cl=$("#cl");if(cl&&view.t==="chat"){cl.innerHTML=msgsHtml();cl.scrollTop=cl.scrollHeight}}
+async function sbEnter(user){
+  const {data}=await sb.from("profiles").select("name,role,klasa").eq("id",user.id).maybeSingle();
+  PROF[user.id]=data||{name:(user.email||"").split("@")[0],role:"Uczeń"};
+  const p=PROF[user.id];
+  enter({name:p.name,role:p.role,klasa:p.klasa||"",posts:0});
+  loadChat();
+}
+$("#lf").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const l=$("#u").value.trim().toLowerCase();
+  if(sb){
+    const {data,error}=await sb.auth.signInWithPassword({email:l.includes("@")?l:l+"@"+DOMAIN,password:$("#p").value});
+    if(error){$("#err").textContent="Błędny login lub hasło.";return}
+    sbEnter(data.user);return;
+  }
+  const u=USERS[l];
+  if(!u||u.pass!==$("#p").value){$("#err").textContent="Błędny login lub hasło.";return}
+  enter(u);
+});
+$("#nav0").addEventListener("click",e=>{if(e.target.closest("[data-n]")){$("#err").textContent="Zaloguj się, aby przejść dalej.";$("#u").focus()}});
+$("#nav").addEventListener("click",e=>{const b=e.target.closest("[data-n]");if(!b)return;go(b.dataset.n==="i"?{t:"index"}:b.dataset.n==="c"?{t:"chat"}:{t:"cat",c:+b.dataset.n})});
+$("#out").onclick=()=>{if(sb)sb.auth.signOut();me=null;$("#p").value="";$("#app").hidden=true;$("#login").hidden=false;$("#u").focus()};
+function go(v){view=v;draw();window.scrollTo(0,0)}
+function crumb(...p){return `<p class="crumb"><button class="lnk" data-go="1">Forum</button>${p.map(x=>` &rsaquo; ${x}`).join("")}</p>`}
+
+function draw(){
+  const m=$("#main");
+  const cur=view.t==="index"?"i":view.t==="chat"?"c":String(view.t==="cat"?view.c:T.find(x=>x.id===view.id).cat);
+  document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.n===cur));
+  if(view.t==="chat"){
+    m.innerHTML=crumb("Chat")+`<div class="blk"><div class="h">Chat</div><div class="chat" id="cl">${msgsHtml()}</div><form id="cf" class="pad" style="display:flex;gap:8px"><input id="cm" type="text" autocomplete="off" maxlength="500" required style="margin:0" aria-label="Wiadomość"><button class="b" type="submit">Wyślij</button></form></div>`;
+    const cl=$("#cl");cl.scrollTop=cl.scrollHeight;return;
+  }
+  if(view.t==="index"){
+    let h="",i=0;
+    for(const g of CATS){
+      h+=`<div class="blk"><div class="h">${g.g}</div>`;
+      for(const it of g.items){const idx=i++,ts=T.filter(t=>t.cat===idx),lt=ts[0];
+        h+=`<div class="row"><div class="av">${it[0][0]}</div><div><button class="lnk n" data-cat="${idx}">${it[0]}</button><div class="s">${it[1]}</div></div><div class="c"><b>${ts.length}</b>wątki</div><div class="s l">${lt?`${esc(lt.title.length>28?lt.title.slice(0,28)+"…":lt.title)}<br>${last(lt).at}, ${esc(last(lt).by)}`:"Brak wpisów"}</div></div>`}
+      h+="</div>";
+    }
+    m.innerHTML=crumb()+h;
+  }else if(view.t==="cat"){
+    const ts=T.filter(t=>t.cat===view.c);
+    m.innerHTML=crumb(NAMES[view.c])+`<div class="bar"><button class="b" data-new="1">Nowy wątek</button></div>
+    <form id="nf" class="blk" hidden><div class="h">Nowy wątek</div><div class="pad"><label for="nt">Temat</label><input id="nt" type="text" maxlength="100" required><label for="nb">Treść</label><textarea id="nb" rows="6" required></textarea><button class="b" type="submit">Opublikuj</button></div></form>
+    <div class="blk"><div class="h">${NAMES[view.c]}</div>
+    ${ts.length?ts.map(t=>`<div class="row"><div class="av">${ini(t.by)}</div><div><button class="lnk n" data-t="${t.id}">${esc(t.title)}</button><div class="s">Autor: ${nm(t.by,t.role)}, ${t.at}</div></div><div class="c"><b>${t.re.length}</b>odpowiedzi</div><div class="s l">Ostatni wpis:<br>${last(t).at}, ${esc(last(t).by)}</div></div>`).join(""):`<div class="pad s">W tym dziale nie ma jeszcze wątków.</div>`}</div>`;
+  }else{
+    const t=T.find(x=>x.id===view.id);
+    const post=(p,first)=>{const u=Object.values(USERS).find(x=>x.name===p.by)||{};
+      return `<div class="post"><div class="u"><div class="av big">${ini(p.by)}</div><div><b>${nm(p.by,p.role)}</b>${p.role}${u.klasa?`<br>Klasa ${u.klasa}`:""}<br>Wpisów: ${u.posts||1}</div></div><div class="m"><div class="d">${p.at}</div><div class="t">${esc(p.body)}</div></div></div>`};
+    m.innerHTML=crumb(`<button class="lnk" data-cat="${t.cat}">${NAMES[t.cat]}</button>`,esc(t.title))+
+    `<div class="blk"><div class="h">${esc(t.title)}</div>${post(t)}${t.re.map(r=>post(r)).join("")}</div>
+    <form id="rf" class="blk"><div class="h">Odpowiedz</div><div class="pad"><textarea id="rb" rows="5" required></textarea><button class="b" type="submit">Dodaj odpowiedź</button></div></form>`;
+  }
+}
+$("#main").addEventListener("click",e=>{
+  const b=e.target.closest("[data-go],[data-cat],[data-t],[data-new]");if(!b)return;
+  if(b.dataset.go)go({t:"index"});
+  else if(b.dataset.cat!==undefined)go({t:"cat",c:+b.dataset.cat});
+  else if(b.dataset.t)go({t:"topic",id:+b.dataset.t});
+  else if(b.dataset.new){const f=$("#nf");f.hidden=!f.hidden;if(!f.hidden)$("#nt").focus()}
+});
+$("#main").addEventListener("submit",e=>{
+  e.preventDefault();
+  if(e.target.id==="nf"){T.unshift({id:nid++,cat:view.c,title:$("#nt").value.trim(),by:me.name,role:me.role,at:now(),body:$("#nb").value.trim(),re:[]});me.posts++;draw()}
+  if(e.target.id==="cf"){
+    const body=$("#cm").value.trim();if(!body)return;$("#cm").value="";
+    if(sb){sb.from("messages").insert({body}).select().single().then(({data,error})=>{if(error){alert("Nie udało się wysłać wiadomości.");return}addMsg(data);refreshChat()})}
+    else{CH.push({by:me.name,role:me.role,at:now().slice(-5),body});refreshChat()}
+    $("#cm").focus();
+  }
+  if(e.target.id==="rf"){const t=T.find(x=>x.id===view.id);t.re.push({by:me.name,role:me.role,at:now(),body:$("#rb").value.trim()});me.posts++;draw()}
+});
+if(sb)sb.auth.getSession().then(({data})=>{if(data.session)sbEnter(data.session.user)});
+</script>
+</body>
+</html>
